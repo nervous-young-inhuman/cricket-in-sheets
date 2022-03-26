@@ -1,7 +1,7 @@
 import json
 from itertools import chain
 from functools import lru_cache
-from helpers import first
+from .helpers import first
 
 @lru_cache
 def teams():

@@ -1,8 +1,7 @@
 import re
 import zipfile
 from datetime import timezone, timedelta, datetime
-
-import teams
+from . import teams
 
 # todo: handle draw case
 ACCEPTED_TEXTS = teams.TEAM_KEYS

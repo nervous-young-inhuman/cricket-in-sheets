@@ -2,9 +2,9 @@ from datetime import timezone, timedelta, datetime
 from pathlib import Path
 from collections import defaultdict
 from operator import itemgetter
-import preprocess
-import cricket
-import teams
+from . import preprocess
+from . import cricket
+from . import teams
 
 def get_all_text(file_path):
     with open(file_path, 'rb') as f:
@@ -49,8 +49,8 @@ def main(match_id, start_time, chat_file_path):
             
 
 
-if __name__ == '__main__':
-    chat_file_path = str(Path('./data/_chat.txt').resolve())
-    match_id = ''
-    start_time = ''
-    main(match_id, start_time, chat_file_path)
+# if __name__ == '__main__':
+#     chat_file_path = str(Path('./data/_chat.txt').resolve())
+#     match_id = ''
+#     start_time = ''
+#     main(match_id, start_time, chat_file_path)

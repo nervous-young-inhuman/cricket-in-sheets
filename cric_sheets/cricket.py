@@ -2,7 +2,7 @@ import requests
 import json
 from urllib.parse import urljoin
 from functools import lru_cache
-from shhhhhh import CRICDATA_API_KEY as API_KEY
+from .shhhhhh import CRICDATA_API_KEY as API_KEY
 
 API_URL_PREFIX = "https://api.cricapi.com/v1/"
 class CricketException(Exception):
@@ -73,13 +73,11 @@ def __request(*, path, method='get', params):
         return lambda **kws: wrapper(fn, **kws)
     
     return deco
-    
-SERIES_ID = __cricdata().get('series_id')
-
 
 
 def matches(*, no_cache=False):
     return __cricdata().get('schedules')
+
 
 @__request(path='match_info', method='post', params=('id', 'offset'))
 def __match(data):
@@ -92,3 +90,4 @@ def match(id, *, offset=0):
     return __match(id=id, offset=offset)
 
 
+SERIES_ID = __cricdata().get('series_id')
