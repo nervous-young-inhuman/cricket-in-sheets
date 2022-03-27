@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from collections import namedtuple
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -11,6 +12,17 @@ if not CRICDATA_API_KEY:
 GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
 if not GOOGLE_APPLICATION_CREDENTIALS:
     raise Exception('GOOGLE_APPLICATION_CREDENTIALS not set in env')
+
+DEFAULT_SPREADSHEET = namedtuple('SpreadsheetSecrets', ('ID', 'SHEET_ID', 'SHEET_NAME',))(
+    os.environ.get('SPREADSHEET_ID'),
+    os.environ.get('SPREADSHEET_SHEET_ID'),
+    os.environ.get('SPREADSHEET_SHEET_NAME'),
+)
+
+if not DEFAULT_SPREADSHEET.ID:
+    raise Exception('SPREADSHEET_ID not set in env')
+if not DEFAULT_SPREADSHEET.SHEET_NAME and not DEFAULT_SPREADSHEET.SHEET_ID:
+    raise Exception('SPREADSHEET_SHEET_ID not set in env')
 
 def __google_creds():
     creds = None
@@ -30,3 +42,4 @@ def __google_creds():
     return creds
 
 google_creds = __google_creds()
+
