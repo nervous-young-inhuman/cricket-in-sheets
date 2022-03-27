@@ -33,7 +33,6 @@ def parse_message(raw_text):
 
 def preprocess_texts(all_text):
     lines = all_text.split(b'\r\n')
-
     for line in lines:
         line = line.decode('utf-8')
         match = re.search(CHAT_TEXT_RE, line)

@@ -1,10 +1,13 @@
 import logging
-from .shhhhhh import google_creds
+from functools import lru_cache
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+from .helpers import first
+from .shhhhhh import google_creds
 
 def get_service(*build_args):
     creds = google_creds
@@ -112,6 +115,31 @@ class Sheets(object):
             logging.error(err)
             raise SheetsException(f'Failed to append values to spreadsheet range = "{range}"')
 
+    def sheets(self):
+            fields = 'sheets(properties(sheetId,title,index))'
+            return self.get(fields=fields).get('sheets', [])
+
+    def sheet_properties(self, *, sheet_name, sheet_id, sheets=None):
+            if not sheet_name and (sheet_id is None):
+                raise SheetsException('sheet_name and sheet_id one of them is expected to be non empty.')
+
+            if not sheets:
+                sheets = self.sheets()
+
+            sheet_properties = first(
+                dict(id=sp.get('sheetId'), name=sp.get('title'))
+                for sheet in sheets
+                if (sp := sheet.get('properties')) and
+                ((sp.get('sheetId', {}) == sheet_id)
+                 or (sp.get('title', {}) == sheet_name))
+            )
+            if not sheet_properties:
+                # ye it may look weird when one of them is None. In which case ignore :)
+                raise SheetsException(f'No sheet found by {sheet_name=} or {sheet_id=}')
+
+            return sheet_properties
+
+
     def duplicate(self, *, spreadsheet_id=None, source_sheet_id, new_sheet_name=None, new_sheet_idx=86):
         if spreadsheet_id is None:
             spreadsheet_id = self._id
@@ -131,6 +159,6 @@ class Sheets(object):
         try:
             response = self._service.batchUpdate(spreadsheetId=spreadsheet_id, body=body,).execute()
             return response
-        except HttpError:
+        except HttpError as err:
             logging.error(err)
             raise SheetsException(f'Failed to duplicate spreadsheet page')

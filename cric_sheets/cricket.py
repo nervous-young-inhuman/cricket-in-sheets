@@ -87,7 +87,10 @@ def __match(data):
     return match_data
 
 def match(id, *, offset=0):
-    return __match(id=id, offset=offset)
+    resp = __match(id=id, offset=offset)
+    if resp.get('error'):
+        logging.error(resp['error'])
+    return resp.get('data')
 
 
 SERIES_ID = __cricdata().get('series_id')
