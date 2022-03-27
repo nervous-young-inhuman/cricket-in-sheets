@@ -31,10 +31,13 @@ class Sheets(object):
     def __init__(self, *, spreadsheet_id):
         self._service = get_sheets_service()
         self._id = spreadsheet_id
-        
+
         if not self._service:
             raise SheetsException('Failed to get sheets service')
-    
+
+    def set_spreadsheet_id(self, id):
+        self._id = id
+
     def get(self, *,
         spreadsheet_id=None,
         fields='spreadsheetId,spreadsheetUrl,properties(title,timeZone),sheets(properties(sheetId,title,index))',
@@ -46,10 +49,13 @@ class Sheets(object):
                 spreadsheetId=spreadsheet_id,
                 fields=fields
             ).execute()
-            return response
         except HttpError as err:
             logging.error(err)
             raise SheetsException(f'Failed to get fetch spreadsheet {spreadsheet_id}')
+
+        if not response:
+            raise SheetsException(f'Failed to get fetch spreadsheet {spreadsheet_id}')
+        return response
 
     def values(self, *, range, spreadsheet_id=None, dimension='ROWS', fields='values'):
         if not spreadsheet_id:
@@ -63,7 +69,7 @@ class Sheets(object):
                 fields=fields,
             ).execute()
             if fields == 'values':
-                return response.get('values')
+                return response.get('values', [])
             return response
         except HttpError as err:
             logging.error(err)
@@ -105,13 +111,13 @@ class Sheets(object):
         except HttpError as err:
             logging.error(err)
             raise SheetsException(f'Failed to append values to spreadsheet range = "{range}"')
-    
+
     def duplicate(self, *, spreadsheet_id=None, source_sheet_id, new_sheet_name=None, new_sheet_idx=86):
         if spreadsheet_id is None:
             spreadsheet_id = self._id
         if not new_sheet_name:
             new_sheet_name = datetime.datetime.now().strftime('%d %b, %H:%M')
-        
+
         requests = [
             {
                 "duplicateSheet": {

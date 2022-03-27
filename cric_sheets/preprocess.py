@@ -18,7 +18,13 @@ def parse_date(time_str, *, timezone=DEFAULT_TIMEZONE):
 
 def parse_contact(contact_str):
     text, subs = re.subn(r'[^+0-9]', '', contact_str)
-    return dict(type=('number' if subs else 'name'), text=text.strip())
+    if 10 <= len(text) < 16:
+        type = 'number'
+    else:
+        type = 'name'
+        text = re.sub(r'\s+', ' ', contact_str)
+
+    return dict(type=type, text=text.strip())
 
 def parse_message(raw_text):
     text = re.sub(r'[^ A-Za-z]', '', raw_text).strip()
